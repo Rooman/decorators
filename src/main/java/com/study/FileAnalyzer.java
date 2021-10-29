@@ -1,6 +1,7 @@
 package com.study;
 
 import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -48,16 +49,18 @@ public class FileAnalyzer {
 
     static List<String> filterWord(List<String> sentences, String word) {
         return sentences.stream()
-                .filter(e -> e.toLowerCase().contains(word))
+                .filter(e -> StringUtils.containsIgnoreCase(e, word))
                 .collect(Collectors.toList());
     }
 
     static int countWord(List<String> sentences, String word) {
-        System.out.println(sentences);
-        Pattern pattern = Pattern.compile(word);
-        return (int) pattern
-                .splitAsStream(Arrays.toString(sentences.toArray()))
-                .count();
+        return (int) Pattern
+                .compile(word.toLowerCase())
+                .matcher(sentences.stream()
+                        .flatMap(String::lines)
+                        .map(String::toLowerCase)
+                        .collect(Collectors.joining()))
+                .results().count();
     }
 
     @Value

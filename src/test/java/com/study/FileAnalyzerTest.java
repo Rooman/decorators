@@ -47,7 +47,7 @@ class FileAnalyzerTest {
     @Test
     @DisplayName("When call 'split(content)' method then correct list of sentences is returned")
     void whenCallSplitMethodThenCorrectListOfSentencesIsReturned() {
-        System.out.println(SENTENCES);
+        System.out.println(split(TEXT));
         assertEquals(SENTENCES, split(TEXT));
     }
 
@@ -55,6 +55,8 @@ class FileAnalyzerTest {
     @DisplayName("When call 'filterWorld(sentences, word) then list of sentences containing word is returned")
     void whenCallFilterWorldSentencesWordThenListOfSentencesContainingWordIsReturned() {
         List<String> expected = List.of(SENTENCES.get(0), SENTENCES.get(3));
+        System.out.println("ex" +expected);
+        System.out.println("fi" + filterWord(SENTENCES, WORD_ENG));
         assertEquals(expected, filterWord(SENTENCES, WORD_ENG));
         expected = List.of(SENTENCES.get(0), SENTENCES.get(2));
         assertEquals(expected, filterWord(SENTENCES, WORD_RUS));
@@ -72,10 +74,18 @@ class FileAnalyzerTest {
     }
 
     @Test
-    @DisplayName("When call 'countWord()' then correct occurrence returns")
+    @DisplayName("When call 'countWord()' with russian word then correct occurrence returns")
     void whenCallCountWordThenCorrectOccurrenceReturn() {
         int expected = 4;
         int actual = countWord(List.of("Время have some время, а ты нет!", "Программа нужно временная вовремя прививка?"), "врем");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("When call 'countWord()' with english word then correct occurrence returns")
+    void whenCallCountWordThenCorrectOccurrenceReturnEng() {
+        int expected = 5;
+        int actual = countWord(List.of("Lasdf java lkasdjjavalaksdfj kjd kdkd ss!", "asdf asfd  adsf ?", "Javafsldf sdlkfjavakdljf *(*(java"), "JAVA");
         assertEquals(expected, actual);
     }
 
