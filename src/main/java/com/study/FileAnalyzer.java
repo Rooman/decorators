@@ -2,14 +2,16 @@ package com.study;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileAnalyzer {
     private static final int BUFFER_SIZE = 8192; // 8KB
     private static final String UTF = "UTF-8";
-    private static final String REGEX = ".?!";
+    private static final String REGEX = "((?<=\\.)|(?<=\\?)|(?<=!))";
 
-    public static int getOccurrences(String path, String word) throws IOException {
+    public static int countMatches(String path, String word) throws IOException {
         String content = readContent(path);
         List<String> sentences = split(content);
         List<String> sentencesInOccurrence = filter(sentences, word);
@@ -18,21 +20,20 @@ public class FileAnalyzer {
     }
 
     static String readContent(String path) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
+        String content;
 
         try (InputStream inputStream = new FileInputStream(path);
-             BufferedReader bufferedReader = new BufferedReader(
-                     new InputStreamReader(inputStream, UTF), BUFFER_SIZE)) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, UTF), BUFFER_SIZE)) {
+
+            content = bufferedReader.lines().toString();
         }
-        return stringBuilder.toString();
+        return content;
     }
 
     static List<String> split(String content) {
-        return Arrays.asList(content.split(REGEX));
+        return Arrays.stream(content.split(REGEX))
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 
     static List<String> filter(List<String> sentences, String word) {
