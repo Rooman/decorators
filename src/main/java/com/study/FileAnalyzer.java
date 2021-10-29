@@ -1,31 +1,41 @@
 package com.study;
 
-import java.io.*;
+import lombok.Value;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class FileAnalyzer {
+    private static final String EXCEPTION_IN_STREAM = "Something went wrong in 'readContent(String path)')!";
     private static final int BUFFER_SIZE = 8192; // 8KB
     private static final String UTF = "UTF-8";
     private static final String REGEX = "((?<=\\.)|(?<=\\?)|(?<=!))";
 
-    public static int countMatches(String path, String word) throws IOException {
-        String content = readContent(path);
-        List<String> sentences = split(content);
-        List<String> sentencesInOccurrence = filter(sentences, word);
+    public static Values countMatches(String path, String word) {
+        var content = readContent(path);
+        var sentences = split(content);
+        var sentencesWithWord = filterWord(sentences, word);
+        var countWord = countWord(sentencesWithWord, word);
 
-        return countWord(sentencesInOccurrence, word);
+        return new Values(countWord, sentencesWithWord);
     }
 
-    static String readContent(String path) throws IOException {
+    static String readContent(String path) {
         String content;
 
-        try (InputStream inputStream = new FileInputStream(path);
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, UTF), BUFFER_SIZE)) {
+        try (var inputStream = new FileInputStream(path);
+             var bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, UTF), BUFFER_SIZE)) {
 
-            content = bufferedReader.lines().toString();
+            content = bufferedReader.lines().parallel().collect(Collectors.joining());
+        } catch (IOException e) {
+            throw new RuntimeException(EXCEPTION_IN_STREAM, e);
         }
         return content;
     }
@@ -36,12 +46,23 @@ public class FileAnalyzer {
                 .collect(Collectors.toList());
     }
 
-    static List<String> filter(List<String> sentences, String word) {
-        return null;
+    static List<String> filterWord(List<String> sentences, String word) {
+        return sentences.stream()
+                .filter(e -> e.toLowerCase().contains(word))
+                .collect(Collectors.toList());
     }
 
-    static int countWord(List<String> sentencesInOccurrence, String word) {
-        return 0;
+    static int countWord(List<String> sentences, String word) {
+        System.out.println(sentences);
+        Pattern pattern = Pattern.compile(word);
+        return (int) pattern
+                .splitAsStream(Arrays.toString(sentences.toArray()))
+                .count();
     }
 
+    @Value
+    static class Values {
+        int count;
+        List<String> sentencesWithWord;
+    }
 }

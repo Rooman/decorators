@@ -1,75 +1,101 @@
 package com.study;
 
-import org.junit.jupiter.api.*;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
+import static com.study.FileAnalyzer.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FileAnalyzerTest {
     private static final String PATH = "testFile.text";
-    private static final String TEXT = "Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do " +
-            "eiusmod tempor incididunt ut labore et dolore magna aliqua! Molestie at elementum eu facilisis " +
-            "sed odio morbi quis commodo. In mollis nunc sed id semper risus in hendrerit. Vestibulum lectus " +
-            "mauris ultrices eros in cursus. Eu augue ut lectus arcu bibendum. Nunc lobortis mattis aliquam " +
-            "faucibus purus in massa tempor? Libero enim sed faucibus turpis in eu. Pharetra convallis posuere " +
-            "morbi leo urna molestie at. Donec et odio pellentesque diam volutpat commodo sed. Consequat ac " +
-            "donec et odio pellentesque diam. Pellentesque elit eget gravida cum sociis natoque penatibus. In " +
-            "fermentum posuere urna nec. At elementum eu facilisis sed! Accumsan lacus vel facilisis est velit?";
-
+    private static final String TEXT = "Если бы в Java действительно работала сборка мусора, большинство программ бы удаляли сами себя при первом же запуске. " +
+            "Если вы начинаете сгонять муху с монитора при помощи курсора мыши, пора выключать компьютер. " +
+            "Измерять продуктивность программиста подсчетом строк кода — это так же, как оценивать постройку самолета по его весу? " +
+            "Java — это C++, из которого убрали все пистолеты, ножи и дубинки!";
+    private static final List<String> SENTENCES = List.of(
+            "Если бы в Java действительно работала сборка мусора, большинство программ бы удаляли сами себя при первом же запуске.",
+            "Если вы начинаете сгонять муху с монитора при помощи курсора мыши, пора выключать компьютер.",
+            "Измерять продуктивность программиста подсчетом строк кода — это так же, как оценивать постройку самолета по его весу?",
+            "Java — это C++, из которого убрали все пистолеты, ножи и дубинки!");
+    private static final String WORD_ENG = "Java";
+    private static final String WORD_RUS = "программ";
 
     @BeforeAll
-    static void beforeAll() throws IOException {
-        File file = new File(PATH);
-        if (!file.createNewFile()) {
-            file.delete();
-            file.createNewFile();
-            System.out.println("Recreating file!!!!");
-        }
-        fulfillFile();
+    static void beforeAll() {
+        createNewFileAndFillIn();
     }
 
     @AfterAll
     static void afterAll() {
-        new File(PATH).delete();
+        deleteFile();
     }
 
     @Test
     @DisplayName("When call 'readContent(path)' then correct String is returned")
-    void whenCallReadContentIsCalledThenCorrectStringIsReturned() throws IOException {
-         assertEquals(TEXT, FileAnalyzer.readContent(PATH));
+    void whenCallReadContentIsCalledThenCorrectStringIsReturned() {
+        assertEquals(TEXT, readContent(PATH));
     }
 
     @Test
     @DisplayName("When call 'split(content)' method then correct list of sentences is returned")
     void whenCallSplitMethodThenCorrectListOfSentencesIsReturned() {
-        List<String> expected = List.of("Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do " +
-                "eiusmod tempor incididunt ut labore et dolore magna aliqua!", "Molestie at elementum eu facilisis " +
-                "sed odio morbi quis commodo.", "In mollis nunc sed id semper risus in hendrerit.", "Vestibulum lectus " +
-                "mauris ultrices eros in cursus.", "Eu augue ut lectus arcu bibendum.", "Nunc lobortis mattis aliquam " +
-                "faucibus purus in massa tempor?", "Libero enim sed faucibus turpis in eu.", "Pharetra convallis posuere " +
-                "morbi leo urna molestie at.", "Donec et odio pellentesque diam volutpat commodo sed.", "Consequat ac " +
-                "donec et odio pellentesque diam.", "Pellentesque elit eget gravida cum sociis natoque penatibus.", "In " +
-                "fermentum posuere urna nec.", "At elementum eu facilisis sed!", "Accumsan lacus vel facilisis est velit?");
-        assertEquals(expected, FileAnalyzer.split(TEXT));
+        System.out.println(SENTENCES);
+        assertEquals(SENTENCES, split(TEXT));
     }
+
     @Test
-    @DisplayName("Given path and word when ")
-    void givenPathAndWordWhen() throws IOException {
+    @DisplayName("When call 'filterWorld(sentences, word) then list of sentences containing word is returned")
+    void whenCallFilterWorldSentencesWordThenListOfSentencesContainingWordIsReturned() {
+        List<String> expected = List.of(SENTENCES.get(0), SENTENCES.get(3));
+        assertEquals(expected, filterWord(SENTENCES, WORD_ENG));
+        expected = List.of(SENTENCES.get(0), SENTENCES.get(2));
+        assertEquals(expected, filterWord(SENTENCES, WORD_RUS));
+    }
 
-        String word = "sed";
-        File file = new File(PATH);
-        file.createNewFile();
-        int expected = 2;
-        int actual = FileAnalyzer.countMatches(PATH, word);
+    @Test
+    @DisplayName("When call 'countMatches(path, word)' then number of occurrence is returned")
+    void whenCallCountMatchesPathWordThenNumberOfOccurrenceIsReturned() {
+        Values values = countMatches(PATH, WORD_ENG);
+        Values values2 = countMatches(PATH, WORD_RUS);
+        assertEquals(2, values.getCount());
+        assertEquals(2, values2.getCount());
+        assertEquals(List.of(SENTENCES.get(0), SENTENCES.get(3)), values.getSentencesWithWord());
+        assertEquals(List.of(SENTENCES.get(0), SENTENCES.get(2)), values2.getSentencesWithWord());
+    }
 
+    @Test
+    @DisplayName("When call 'countWord()' then correct occurrence returns")
+    void whenCallCountWordThenCorrectOccurrenceReturn() {
+        int expected = 4;
+        int actual = countWord(List.of("Время have some время, а ты нет!", "Программа нужно временная вовремя прививка?"), "врем");
         assertEquals(expected, actual);
     }
 
-    static void fulfillFile() throws IOException {
+    @SneakyThrows
+    private static void createNewFileAndFillIn() {
+        File file = new File(PATH);
+        if (!file.createNewFile()) {
+            file.delete();
+            file.createNewFile();
+        }
+        fillInFile();
+    }
+
+    private static void fillInFile() throws IOException {
         try (FileOutputStream fos = new FileOutputStream(FileAnalyzerTest.PATH)) {
             fos.write(FileAnalyzerTest.TEXT.getBytes());
         }
+    }
+
+    private static void deleteFile() {
+        new File(PATH).delete();
     }
 }
