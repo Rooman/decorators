@@ -17,7 +17,7 @@ class FileManagerTest {
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        createTestDirectoriesWithFiles(FROM);
+        createTestDirectoriesWithFiles();
     }
 
     @AfterEach
@@ -84,10 +84,10 @@ class FileManagerTest {
     }
 
     @SneakyThrows
-    private void createTestDirectoriesWithFiles(String from) {
+    private void createTestDirectoriesWithFiles() {
         StringBuilder path = new StringBuilder(new File(".").getCanonicalPath());
         for (int i = 0; i < 4; i++) {
-            path.append(File.separator).append(from).append(i);
+            path.append(File.separator).append(FileManagerTest.FROM).append(i);
             new File(path.toString()).mkdir();
             for (int j = 0; j < 2; j++) {
                 path.append(File.separator);
