@@ -46,6 +46,7 @@ class FileManagerTest {
         FileManager.copy(from, to);
         assertTrue(new File(to).exists());
         clear("TempDir#1");
+        assertFalse(new File("TempDir#1").exists());
     }
 
     @Test
@@ -57,6 +58,8 @@ class FileManagerTest {
         FileManager.copy(from, to);
         assertTrue(new File(to).exists());
         clear(to);
+        assertFalse(new File(to).exists());
+
     }
 
     @Test
@@ -69,6 +72,7 @@ class FileManagerTest {
         assertTrue(new File("TempDir#33/TempDir#1/TempDir#2/TempDir#3/temp#0.file")
                 .exists());
         clear(to);
+        assertFalse(new File(to).exists());
     }
 
     @Test
@@ -81,6 +85,7 @@ class FileManagerTest {
                 .exists());
         assertFalse(new File(from).exists());
         clear(to);
+        assertFalse(new File(to).exists());
     }
 
     @SneakyThrows

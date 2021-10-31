@@ -7,15 +7,6 @@ import java.util.Objects;
 
 public class FileManager {
 
-    @SneakyThrows
-    public static void main(String[] args) {
-        String from = "TempDir#0";
-//        String to = "TempDir#33";
-
-        FileManager.deleteFiles(from);
-    }
-
-    //// возвращает количество файлов в папке и всех подпапках по пути
     public static int countFiles(String path) {
         int count = 0;
         File file = new File(path);
@@ -31,7 +22,6 @@ public class FileManager {
         return count;
     }
 
-    //// возвращает количество папок в папке и всех подпапках по пути
     public static int countDirs(String path) {
         int count = 0;
         File file = new File(path);
